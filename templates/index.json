@@ -124,7 +124,7 @@
       ],
       "settings": {
         "heading": "Multimedia collage",
-        "heading_size": "h2",
+        "heading_tag": "h2",
         "desktop_layout": "left",
         "mobile_layout": "collage",
         "color_scheme": "scheme-1",
