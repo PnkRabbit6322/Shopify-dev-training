@@ -5,6 +5,30 @@
   z-index: 1;
 }
 
+div.quick-add-button-container {
+  position: absolute;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+div.quick-add-button {
+  bottom: 0;
+  z-index: 20;
+  position: absolute;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: all 0.3s ease-in;
+  padding: 10px;
+  width: 100%;
+}
+
+div.quick-add-button-container:hover > div.quick-add-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .card--card .quick-add {
   margin: 0 1.3rem 1rem;
 }
