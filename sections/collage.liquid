@@ -6,14 +6,64 @@
 
 {%- style -%}
   .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-top: {{ section.settings.padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+  }
+
+  {%- for block in section.blocks -%}
+
+    {%- if block.type == "image" -%}
+      .collage__item--image {
+        grid-column: span {{ block.settings.image_size_col }} ;
+        grid-row: span {{ block.settings.image_size_row }} ;
+      }
+    {%- endif -%}
+
+    {%- if block.type == "product" -%}
+      .collage__item--product {
+        grid-column: span {{ block.settings.product_size_col }} ;
+        grid-row: span {{ block.settings.product_size_row }} ;
+      }
+    {%- endif -%}
+
+    {%- if block.type == "collection" -%}
+      .collage__item--collection {
+        grid-column: span {{ block.settings.collection_size_col }} ;
+        grid-row: span {{ block.settings.collection_size_row }} ;
+      }
+    {%- endif -%}
+
+    {%- if block.type == "video" -%}
+      .collage__item--video {
+        grid-column: span {{ block.settings.video_size_col }} ;
+        grid-row: span {{ block.settings.video_size_row }} ;
+      }
+    {%- endif -%}
+  {%- endfor -%}
+
+  .collage {
+    display: grid;
   }
 
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-top: {{ section.settings.padding_top_desktop }}px;
+      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+    }
+
+    .collage {
+      grid-template-columns: repeat({{ section.settings.column_amount_desktop }}, minmax(0, 1fr));
+      gap: {{ section.settings.block_spacing_desktop }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .collage {
+      gap: {{ section.settings.block_spacing_mobile }}px;
+    }
+
+    .collage--mobile {
+      grid-template-columns: repeat({{ section.settings.column_amount_mobile }}, minmax(0, 1fr));
     }
   }
 {%- endstyle -%}
@@ -127,7 +177,9 @@
                 placeholder_image: placeholder_image,
                 skip_styles: skip_card_product_styles,
                 show_vendor: section.settings.product_show_vendor,
-                show_rating: section.settings.product_show_rating
+                show_rating: section.settings.product_show_rating,
+                quick_add: 'standard',
+                media_aspect_ratio: 'portrait'
               %}
               {% assign skip_card_product_styles = true %}
             {%- when 'collection' -%}
@@ -248,8 +300,8 @@
   "name": "t:sections.collage.name",
   "tag": "section",
   "class": "section",
-  "disabled_on": {
-    "groups": ["header", "footer"]
+  "enabled_on": {
+    "templates": ["collection", "product"]
   },
   "settings": [
     {
