@@ -120,3 +120,60 @@ if (!customElements.get('quick-add-modal')) {
     }
   );
 }
+
+function addToCart(id, product_form_id) {
+  const opener = document.querySelector('#' + product_form_id + '-submit');
+
+  console.log('#' + product_form_id + '_submit');
+
+  opener.setAttribute('aria-disabled', true);
+  opener.classList.add('loading');
+  opener.querySelector('.loading__spinner').classList.remove('hidden');
+
+  if (id) {
+    let formData = {
+      items: [
+        {
+          id: id,
+          quantity: 1,
+        },
+      ],
+      sections: 'cart-notification-button,cart-notification-product,cart-icon-bubble',
+    };
+
+    fetch(window.Shopify.routes.root + 'cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        openNotification(data);
+      })
+      .catch((error) => {
+        console.log('error: ', error);
+      })
+      .finally(() => {
+        opener.removeAttribute('aria-disabled');
+        opener.classList.remove('loading');
+        opener.querySelector('.loading__spinner').classList.add('hidden');
+      });
+  }
+}
+
+function openNotification(data) {
+  const cartNotification = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
+  if (cartNotification) {
+    const responseHTML = new DOMParser().parseFromString(data.sections['cart-notification-product'], 'text/html');
+    cartNotification.querySelector('.cart-notification-product').innerHTML = responseHTML.querySelector(
+      '[id*="' + data.items[0].id + '"]'
+    ).outerHTML;
+    cartNotification.querySelector('#cart-notification-button').innerHTML = data.sections['cart-notification-button'];
+    document.querySelector('#cart-icon-bubble').innerHTML = data.sections['cart-icon-bubble'];
+    cartNotification.open();
+  }
+}
