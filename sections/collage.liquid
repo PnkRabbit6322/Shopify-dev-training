@@ -10,40 +10,27 @@
     padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
   }
 
-  {%- for block in section.blocks -%}
-
-    {%- if block.type == "image" -%}
-      .collage__item--image {
-        grid-column: span {{ block.settings.image_size_col }} ;
-        grid-row: span {{ block.settings.image_size_row }} ;
-      }
-    {%- endif -%}
-
-    {%- if block.type == "product" -%}
-      .collage__item--product {
-        grid-column: span {{ block.settings.product_size_col }} ;
-        grid-row: span {{ block.settings.product_size_row }} ;
-      }
-    {%- endif -%}
-
-    {%- if block.type == "collection" -%}
-      .collage__item--collection {
-        grid-column: span {{ block.settings.collection_size_col }} ;
-        grid-row: span {{ block.settings.collection_size_row }} ;
-      }
-    {%- endif -%}
-
-    {%- if block.type == "video" -%}
-      .collage__item--video {
-        grid-column: span {{ block.settings.video_size_col }} ;
-        grid-row: span {{ block.settings.video_size_row }} ;
-      }
-    {%- endif -%}
-  {%- endfor -%}
-
   .collage {
     display: grid;
   }
+
+  .card-wrapper.product-card-wrapper {
+    height: fit-content;
+  }
+
+  {%- if section.settings.fullwidth_desktop -%}
+    @media screen and (min-width: 750px) {
+      .full-width {
+        max-width: 100%;
+      }
+    }
+  {%- elsif section.settings.fullwidth_mobile -%}
+    @media screen and (max-width: 749px) {
+      .full-width {
+        max-width: 100%;
+      }
+    }
+  {%- endif -%}
 
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
@@ -66,10 +53,44 @@
       grid-template-columns: repeat({{ section.settings.column_amount_mobile }}, minmax(0, 1fr));
     }
   }
+
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {% when 'image' %}
+        div.collage__item--image-{{ forloop.index }} {
+          grid-column: span {{ block.settings.image_size_col }} ;
+          grid-row: span {{ block.settings.image_size_row }} ;
+        }
+      {% when 'product' %}
+        div.collage__item--product-{{ forloop.index }} {
+          grid-column: span {{ block.settings.product_size_col }} ;
+          grid-row: span {{ block.settings.product_size_row }} ;
+        }
+      {% when 'collection' %}
+        div.collage__item--collection-{{ forloop.index }} {
+          grid-column: span {{ block.settings.collection_size_col }} ;
+          grid-row: span {{ block.settings.collection_size_row }} ;
+        }
+      {% when 'video' %}
+        div.collage__item--video-{{ forloop.index }} {
+          grid-column: span {{ block.settings.video_size_col }} ;
+          grid-row: span {{ block.settings.video_size_row }} ;
+        }
+    {%- endcase -%}
+  {%- endfor -%}
 {%- endstyle -%}
 
+{% javascript %}
+  const observer = lozad('.lozad', {
+    threshold: 0.1, // ratio of element convergence
+    enableAutoReload: true, // it will reload the new image when validating attributes changes
+  }); // lazy loads elements with default selector as '.lozad'
+  observer.observe();
+  quicklink.listen();
+{% endjavascript %}
+
 <div class="color-{{ section.settings.color_scheme }} gradient isolate">
-  <div class="page-width section-{{ section.id }}-padding">
+  <div class="page-width section-{{ section.id }}-padding full-width">
     {%- if sections.settings.subheading != blank -%}
       <h3 class="collage-wrapper-title inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
         {{- section.settings.subheading -}}
@@ -97,7 +118,7 @@
       {% assign skip_card_product_styles = false %}
       {%- for block in section.blocks -%}
         <div
-          class="collage__item collage__item--{{ block.type }} collage__item--{{ section.settings.desktop_layout }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+          class="collage__item collage__item--{{ block.type }}-{{ forloop.index }} collage__item--{{ section.settings.desktop_layout }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
           {{ block.shopify_attributes }}
           {% if settings.animations_reveal_on_scroll %}
             data-cascade
@@ -179,7 +200,10 @@
                 show_vendor: section.settings.product_show_vendor,
                 show_rating: section.settings.product_show_rating,
                 quick_add: 'standard',
-                media_aspect_ratio: 'portrait'
+                media_aspect_ratio: 'portrait',
+                section_col_nums_desktop: section.settings.column_amount_desktop,
+                section_col_nums_mobile: section.settings.column_amount_mobile,
+                product_size_col: block.settings.product_size_col
               %}
               {% assign skip_card_product_styles = true %}
             {%- when 'collection' -%}
