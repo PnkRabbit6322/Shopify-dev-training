@@ -11,5 +11,16 @@
     "editor.defaultFormatter": "Shopify.theme-check-vscode",
     "editor.formatOnSave": true
   },
-  "themeCheck.checkOnSave": true
+  "themeCheck.checkOnSave": true,
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\.(html|css|js|liquid)$",
+        "cmd": "npx tailwindcss -i ./style.css -o ./assets/style.css",
+        "message": "Building css...",
+        "messageAfter": "Done.",
+        "showElapsed": true
+      }
+    ]
+  }
 }
