@@ -45,7 +45,7 @@
       assign ratio = 1
     endif
   -%}
-  <div class="card-wrapper product-card-wrapper underline-links-hover" style="height: 100%;">
+  <div class="card-wrapper product-card-wrapper underline-links-hover h-full">
     <div
       class="
         card card--{{ settings.card_style }}
@@ -323,7 +323,7 @@
         </div>
       </div>
       <div class="card_info_container flex flex-col gap-4 h-full justify-between">
-        <div class="card__content">
+        <div class="grid p-4 w-full flex-grow-0">
           <div class="card__information">
             <h3
               class="card__heading{% if card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
@@ -481,13 +481,16 @@
         </div>
         {%- if bundle -%}
           {%- unless card_product.has_only_default_variant -%}
-            <div class="option-container flex flex-col">
+            <div class="option-container flex flex-col gap-2">
               {% for option in card_product.options -%}
                 <label class="flex flex-col">
                   {{ option }}
-                  <div class="flex flex-row flex-grow-0 gap-4">
+                  <div class="flex flex-row gap-2">
                     {%- for value in product.options_by_name[option].values %}
-                      <button class="inline-flex justify-center align-middle min-w-4 min-h-4 px-4 border-4 border-solid">
+                      <button
+                        :id="$id('variant-button')"
+                        class="button button--secondary max-w-[20%] md:min-w-[25%] p-0"
+                      >
                         {{ value }}
                       </button>
                     {%- endfor %}
@@ -548,7 +551,7 @@
                   id="{{ product_form_id }}-submit"
                   type="button"
                   name="add"
-                  @click="addToBundle( {{ card_product | json | replace: '"', '&quot;' }} )"
+                  @click="addToBundle( {{ card_product | json | replace: '"', '&quot;' }}, {{ card_product.selected_or_first_available_variant.id }} )"
                   class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add{% endif %}"
                   aria-haspopup="dialog"
                   aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
@@ -617,7 +620,7 @@
           </div>
         </div>
       </div>
-      <div class="card__content">
+      <div class="grid p-4 w-full flex-grow-0">
         <div class="card__information">
           <h3 class="card__heading card__heading--placeholder{% if settings.card_style == 'standard' %} h5{% endif %}">
             <a role="link" aria-disabled="true" class="full-unstyled-link">
@@ -627,7 +630,9 @@
           <div class="card-information">
             {%- if show_vendor -%}
               <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
-              <div class="caption-with-letter-spacing light">{{ 'products.product.vendor' | t }}</div>
+              <div class="caption-with-letter-spacing light">
+                {{ 'products.product.vendor' | t }}
+              </div>
             {%- endif -%}
             {% render 'price', placeholder: placeholder, show_compare_at_price: true %}
           </div>

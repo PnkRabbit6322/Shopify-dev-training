@@ -1,128 +1,74 @@
-{{ 'bundle.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
-{{ 'component-modal-video.css' | asset_url | stylesheet_tag }}
-{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
-  .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top_mobile }}px;
-    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+  [x-cloak] { display: none !important; }
+
+  .section-template-background .dark {
+    background-color: {{ section.settings.color_background_dark }}
   }
 
-  .card-wrapper.product-card-wrapper {
-    height: 100%;
-  }
-
-  .bundle {
-    display: grid;
-    max-width: 75%;
-  }
-
-  .card-wrapper.product-card-wrapper {
-    height: fit-content;
-  }
-
-  @media screen and (min-width: 768px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top_desktop }}px;
-      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
-    }
-
-    .bundle {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: {{ section.settings.block_spacing_desktop }}px;
-    }
-  }
-
-  @media screen and (max-width: 767px) {
-    .bundle {
-      gap: {{ section.settings.block_spacing_mobile }}px;
-    }
-
-    .bundle-product-containter {
-      align-items: center;
-    }
-
-    .bundle--mobile {
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-    }
-  }
-
-  div.bundle--product-{{ forloop.index }} {
-    grid-column: 1 ;
-    grid-row: 1 ;
+  .section-template-background {
+    background-color: {{ section.settings.color_background_light }}
   }
 {%- endstyle -%}
 
 {{ 'bundle-add.js' | asset_url | script_tag }}
 
-<div class="color-{{ section.settings.color_scheme }} gradient isolate">
+<div class="section-template-background gradient isolate">
   <div
-    x-data="{ mobile: false }"
-    @resize.window="
-      width = window.innerWidth > 0 ? window.innerWidth : screen.width;
-      if (width <= 749) {
-        mobile = true;
-      } else {
-        mobile = false;
-      }
-    "
+    class="max-w-[var(--page-width)] mt-0 mb-auto mx-auto {% if section.settings.fullwidth_mobile %}w-screen{% endif %}{% if section.settings.fullwidth_desktop %}md:w-screen{% endif %} px-0 pt-[{{ section.settings.padding_top_mobile }}px] pb-[{{ section.settings.padding_bottom_mobile }}px] md:pt-[{{ section.settings.padding_top_desktop }}px] md:pb-[{{ section.settings.padding_bottom_desktop }}px]"
   >
-    <div
-      class="page-width section-{{ section.id }}-padding px-0"
-      :class="mobile ? '{%- if section.settings.fullwidth_mobile -%} w-screen {%- endif -%}' : '{%- if section.settings.fullwidth_desktop -%} w-screen {%- endif -%}'"
-    >
-      {%- if section.settings.heading != blank -%}
-        <h2
-          class="bundle-wrapper-title inline-text {{ section.settings.heading_tag }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          style="font-size: {{ section.settings.heading_size }}%"
-        >
-          {{-
-            section.settings.heading
-            | replace: '[', '<span class="relative inline-block" style="font-weight: bold;">'
-            | replace: ']', '</span>'
-          -}}
-        </h2>
-      {%- endif -%}
-      {%- if section.settings.subheading_text != blank -%}
-        <p class="bundle-wrapper-title inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-          {{- section.settings.subheading_text -}}
-        </p>
-      {%- endif -%}
-
-      <div
-        x-data="
-          {
-            bundle_items: [],
-            bundle_item_ids: [],
-
-            addToBundle(item) {
-              if (!{{ section.settings.allow_multiple_products }} || !this.bundle_item_ids.includes(item.variants[0].id)) {
-                this.bundle_items.push(item);
-                this.bundle_item_ids.push(item.variants[0].id);
-              }
-            },
-
-            removeFromBundle(index) {
-              this.bundle_items.splice(index, 1);
-              this.bundle_item_ids.splice(index, 1);
-            }
-          }
-        "
-        class="bundle-product-containter flex flex-col gap-2 md:flex-row"
+    {%- if section.settings.heading != blank -%}
+      <h2
+        class="mt-0 mb-12 inline-text text-[{{ section.settings.heading_size }}%] {{ section.settings.heading_tag }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
       >
-        <div class="bundle{% if section.settings.mobile_layout == 'bundle' %} bundle--mobile{% endif %} w-full h-full flex-grow-8">
-          {%- if section.settings.product_list != blank -%}
-            {%- for product in section.settings.product_list limit: section.settings.product_shown -%}
-              <div
-                class="bundle__item bundle__item--product-{{ forloop.index }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {{ block.shopify_attributes }}
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
+        {{-
+          section.settings.heading
+          | replace: '[', '<span class="relative inline-block font-bold">'
+          | replace: ']', '</span>'
+        -}}
+      </h2>
+    {%- endif -%}
+    {%- if section.settings.subheading_text != blank -%}
+      <p class="mt-0 mb-12 inline-text{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{- section.settings.subheading_text -}}
+      </p>
+    {%- endif -%}
+
+    <div
+      x-data="
+        {
+          bundle_items: [],
+          bundle_item_ids: [],
+
+          addToBundle(item, id) {
+            if (!{{ section.settings.allow_multiple_products }} || !this.bundle_item_ids.includes(id)) {
+              this.bundle_items.push(item);
+              this.bundle_item_ids.push(id);
+            }
+          },
+
+          removeFromBundle(index) {
+            this.bundle_items.splice(index, 1);
+            this.bundle_item_ids.splice(index, 1);
+          }
+        }
+      "
+      class="items-center md:items-start flex flex-col gap-2 md:flex-row"
+    >
+      <div class="grid grid-cols-1 gap-[{{ section.settings.block_spacing_mobile }}px] md:grid-cols-3 md:gap-[{{ section.settings.block_spacing_desktop }}px] w-full max-w-[75%] h-full flex-grow-8">
+        {%- if section.settings.product_list != blank -%}
+          {%- for product in section.settings.product_list limit: section.settings.product_shown -%}
+            <div
+              class="row-span-1 col-span-1 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+              {{ block.shopify_attributes }}
+              {% if settings.animations_reveal_on_scroll %}
+                data-cascade
+                style="--animation-order: {{ forloop.index }};"
+              {% endif %}
+            >
+              <div class="w-full max-w-none h-full">
                 {% assign skip_card_product_styles = false %}
                 {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
                 {% render 'card-product',
@@ -138,17 +84,19 @@
                   product_size_col: 1
                 %}
               </div>
-            {%- endfor -%}
-          {%- elsif section.settings.collection != blank -%}
-            {%- for product in section.settings.collection.products limit: section.settings.product_shown -%}
-              <div
-                class="bundle__item bundle__item--product-{{ forloop.index }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {{ block.shopify_attributes }}
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
+            </div>
+          {%- endfor -%}
+        {%- elsif section.settings.collection != blank -%}
+          {%- for product in section.settings.collection.products limit: section.settings.product_shown -%}
+            <div
+              class="row-span-1 col-span-1 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+              {{ block.shopify_attributes }}
+              {% if settings.animations_reveal_on_scroll %}
+                data-cascade
+                style="--animation-order: {{ forloop.index }};"
+              {% endif %}
+            >
+              <div class="w-full max-w-none h-full">
                 {% render 'card-product',
                   card_product: product,
                   media_aspect_ratio: 'adapt',
@@ -162,94 +110,97 @@
                   product_size_col: 1
                 %}
               </div>
-            {%- endfor -%}
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+      <div
+        class="sticky bottom-0 md:top-0 border-solid border-2 bg-white h-fit border-[{{ section.settings.line_border_color_light }}]"
+        {{ block.shopify_attributes }}
+        {% if settings.animations_reveal_on_scroll %}
+          data-cascade
+        {% endif %}
+      >
+        <div class="p-8">
+          {%- if section.settings.summary_heading != blank -%}
+            <h2
+              class="m-0 inline-text"
+            >
+              {{- section.settings.summary_heading -}}
+            </h2>
           {%- endif -%}
-        </div>
-        <div
-          class="sticky bottom-0 md:top-0 border-solid border-2 bg-white h-fit border-[{{ section.settings.line_border_color_light }}]"
-          {{ block.shopify_attributes }}
-          {% if settings.animations_reveal_on_scroll %}
-            data-cascade
-          {% endif %}
-        >
-          <div class="p-8">
-            {%- if section.settings.summary_heading != blank -%}
-              <h2
-                class="m-0 bundle-summary-heading inline-text"
+          {%- if section.settings.summary_text != blank -%}
+            <p class="mt-2 inline-text">
+              {{- section.settings.summary_text -}}
+            </p>
+          {%- endif -%}
+          <div>
+            <template x-for="(item, index) in bundle_items">
+              <div
+                id="bundle-summary-product-{{ item.id }}"
+                class="cart-item flex flex-row flex-shrink-0 relative py-1.5 gap-2.5"
               >
-                {{- section.settings.summary_heading -}}
-              </h2>
-            {%- endif -%}
-            {%- if section.settings.summary_text != blank -%}
-              <p class="mt-2 bundle-summary-text inline-text">
-                {{- section.settings.summary_text -}}
-              </p>
-            {%- endif -%}
-            <div class="bundle_summary_item_containter">
-              <template x-for="(item, index) in bundle_items">
-                <div
-                  id="bundle-summary-product-{{ item.id }}"
-                  class="cart-item flex flex-row flex-shrink-0 relative py-1.5 gap-2.5"
-                >
-                  <div class="w-[70px] h-[70px] relative">
-                    <img :src="item.featured_image" alt="" loading="lazy">
-                    <div
-                      class="bundler-button-remove cursor-pointer absolute rtl:-left-1.5 rtl:right-auto -top-1.5 pl-1 pr-1 pt-1 pb-1 -right-1.5 text-black border border-black bg-white rounded-full"
-                      @click="removeFromBundle(index)"
-                    >
-                      <span class="w-2 h-2 block">
-                        <svg
-                          width="100%"
-                          height="100%"
-                          viewBox="0 0 10 10"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M0.757812 8.75781L4.75782 4.75783M4.75782 4.75783L8.7578 0.757812M4.75782 4.75783L0.757812 0.757812M4.75782 4.75783L8.7578 8.75781" stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    {%- if settings.show_vendor -%}
-                      <p class="caption-with-letter-spacing light" x-text="item.vendor"></p>
-                    {%- endif -%}
-                    <h3 class="cart-notification-product__name h4" x-text="item.title"></h3>
-                    <dl>
-                      <div x-show="item.has_only_default_variant">
-                        <template x-for="option in item.options_with_values">
-                          <div class="product-option">
-                            <dt>{{ option.name }}:</dt>
-                            <dd>{{ option.value }}</dd>
-                          </div>
-                        </template>
-                      </div>
-                    </dl>
+                <div class="w-[70px] h-[70px] relative">
+                  <img :src="item.featured_image" alt="" loading="lazy">
+                  <div
+                    class="cursor-pointer absolute rtl:-left-1.5 rtl:right-auto -top-1.5 pl-1 pr-1 pt-1 pb-1 -right-1.5 text-black border border-black bg-white rounded-full"
+                    @click="removeFromBundle(index)"
+                  >
+                    <span class="w-2 h-2 block">
+                      <svg
+                        width="100%"
+                        height="100%"
+                        viewBox="0 0 10 10"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M0.757812 8.75781L4.75782 4.75783M4.75782 4.75783L8.7578 0.757812M4.75782 4.75783L0.757812 0.757812M4.75782 4.75783L8.7578 8.75781" stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </span>
                   </div>
                 </div>
-              </template>
-              <div x-show="bundle_items.length">
-                <button
-                  id="bundle-submit"
-                  type="button"
-                  name="add"
-                  @click="addBundleToCart(bundle_item_ids)"
-                  class="quick-add__submit button button--full-width button--secondary"
-                  aria-haspopup="dialog"
-                  aria-live="polite"
-                  data-sold-out-message="true"
-                >
-                  <span>
-                    {{ 'ADD TO CART' }}
-                  </span>
-                  {%- if horizontal_quick_add -%}
-                    <span class="icon-wrap">
-                      {{- 'icon-plus.svg' | inline_asset_content -}}
-                    </span>
+                <div>
+                  {%- if settings.show_vendor -%}
+                    <p
+                      class="text-[1rem]/[calc(1 + 0.2 / var(--font-body-scale))] tracking-[0.13rem] uppercase opacity-[0.7]"
+                      x-text="item.vendor"
+                    ></p>
                   {%- endif -%}
-                  {%- render 'loading-spinner' -%}
-                </button>
+                  <h3 class="mt-0 mb-2 h4" x-text="item.title"></h3>
+                  <dl>
+                    <div x-show="item.has_only_default_variant">
+                      <template x-for="option in item.options_with_values">
+                        <div class="text-[1.4rem]/[calc(1 + 0.5 / var(--font-body-scale))] break-words">
+                          <dt>{{ option.name }}:</dt>
+                          <dd>{{ option.value }}</dd>
+                        </div>
+                      </template>
+                    </div>
+                  </dl>
+                </div>
               </div>
+            </template>
+            <div x-show="bundle_items.length" x-cloak>
+              <button
+                id="bundle-submit"
+                type="button"
+                name="add"
+                @click="addBundleToCart(bundle_item_ids)"
+                class="p-[0.8rem] min-w-full box-border button button--full-width button--secondary"
+                aria-haspopup="dialog"
+                aria-live="polite"
+                data-sold-out-message="true"
+              >
+                <span>
+                  {{ 'ADD TO CART' }}
+                </span>
+                {%- if horizontal_quick_add -%}
+                  <span class="icon-wrap">
+                    {{- 'icon-plus.svg' | inline_asset_content -}}
+                  </span>
+                {%- endif -%}
+                {%- render 'loading-spinner' -%}
+              </button>
             </div>
           </div>
         </div>

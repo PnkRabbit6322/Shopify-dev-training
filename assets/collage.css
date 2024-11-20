@@ -1,12 +1,3 @@
-.collage-wrapper-title {
-  margin-top: 0;
-  margin-bottom: 3rem;
-}
-
-.collage {
-  display: grid;
-}
-
 .collage__item > * {
   width: 100%;
   max-width: none;

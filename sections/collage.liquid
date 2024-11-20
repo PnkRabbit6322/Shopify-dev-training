@@ -5,60 +5,33 @@
 {{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
-  .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top_mobile }}px;
-    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+  .section-template-background .dark {
+    background-color: {{ section.settings.color_background_dark }}
   }
 
-  .collage {
-    display: grid;
-  }
-
-  .card-wrapper.product-card-wrapper {
-    height: fit-content;
-  }
-
-  @media screen and (min-width: 750px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top_desktop }}px;
-      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
-    }
-
-    .collage {
-      grid-template-columns: repeat({{ section.settings.column_amount_desktop }}, minmax(0, 1fr));
-      gap: {{ section.settings.block_spacing_desktop }}px;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    .collage {
-      gap: {{ section.settings.block_spacing_mobile }}px;
-    }
-
-    .collage--mobile {
-      grid-template-columns: repeat({{ section.settings.column_amount_mobile }}, minmax(0, 1fr));
-    }
+  .section-template-background {
+    background-color: {{ section.settings.color_background_light }}
   }
 
   {%- for block in section.blocks -%}
     {%- case block.type -%}
       {% when 'image' %}
-        div.collage__item--image-{{ forloop.index }} {
+        .collage__item--image-{{ forloop.index }} {
           grid-column: span {{ block.settings.image_size_col }} ;
           grid-row: span {{ block.settings.image_size_row }} ;
         }
       {% when 'product' %}
-        div.collage__item--product-{{ forloop.index }} {
+        .collage__item--product-{{ forloop.index }} {
           grid-column: span {{ block.settings.product_size_col }} ;
           grid-row: span {{ block.settings.product_size_row }} ;
         }
       {% when 'collection' %}
-        div.collage__item--collection-{{ forloop.index }} {
+        .collage__item--collection-{{ forloop.index }} {
           grid-column: span {{ block.settings.collection_size_col }} ;
           grid-row: span {{ block.settings.collection_size_row }} ;
         }
       {% when 'video' %}
-        div.collage__item--video-{{ forloop.index }} {
+        .collage__item--video-{{ forloop.index }} {
           grid-column: span {{ block.settings.video_size_col }} ;
           grid-row: span {{ block.settings.video_size_row }} ;
         }
@@ -66,65 +39,51 @@
   {%- endfor -%}
 {%- endstyle -%}
 
-{{ 'alpine.js' | asset_url | script_tag }}
-
-<div class="color-{{ section.settings.color_scheme }} gradient isolate">
+<div class="section-template-background gradient isolate">
   <div
-    x-data="{ mobile: false }"
-    @resize.window="
-      width = window.innerWidth > 0 ? window.innerWidth : screen.width;
-      if (width <= 749) {
-        mobile = true;
-      } else {
-        mobile = false;
-      }
-    "
+    class="max-w-[var(--page-width)] mt-0 mb-auto mx-auto {% if section.settings.fullwidth_mobile %}w-screen{% endif %}{% if section.settings.fullwidth_desktop %}md:w-screen{% endif %} px-0 pt-[{{ section.settings.padding_top_mobile }}px] pb-[{{ section.settings.padding_bottom_mobile }}px] md:pt-[{{ section.settings.padding_top_desktop }}px] md:pb-[{{ section.settings.padding_bottom_desktop }}px]"
   >
-    <div
-      class="page-width section-{{ section.id }}-padding px-0"
-      :class="mobile ? '{%- if section.settings.fullwidth_mobile -%} w-screen {%- endif -%}' : '{%- if section.settings.fullwidth_desktop -%} w-screen {%- endif -%}'"
-    >
-      {%- if sections.settings.subheading != blank -%}
-        <h3 class="collage-wrapper-title inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-          {{- section.settings.subheading -}}
-        </h3>
-      {%- endif -%}
-      {%- if section.settings.heading != blank -%}
-        <h2
-          class="collage-wrapper-title inline-text {{ section.settings.heading_tag }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          style="font-size: {{ section.settings.heading_size }}%"
-        >
-          {{-
-            section.settings.heading
-            | replace: '[', '<span class="relative inline-block" style="font-weight: bold;">'
-            | replace: ']', '</span>'
-          -}}
-        </h2>
-      {%- endif -%}
-      {%- if sections.settings.heading_text != blank -%}
-        <p class="collage-wrapper-title inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-          {{- section.settings.heading_text -}}
-        </p>
-      {%- endif -%}
+    {%- if sections.settings.subheading != blank -%}
+      <h3 class="mt-0 mb-12 inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{- section.settings.subheading -}}
+      </h3>
+    {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h2
+        class="mt-0 mb-12 inline-text text-[{{ section.settings.heading_size }}%] {{ section.settings.heading_tag }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+      >
+        {{-
+          section.settings.heading
+          | replace: '[', '<span class="relative inline-block font-bold">'
+          | replace: ']', '</span>'
+        -}}
+      </h2>
+    {%- endif -%}
+    {%- if sections.settings.heading_text != blank -%}
+      <p class="mt-0 mb-12 inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{- section.settings.heading_text -}}
+      </p>
+    {%- endif -%}
 
-      <div class="collage{% if section.settings.mobile_layout == 'collage' %} collage--mobile{% endif %}">
-        {% assign skip_card_product_styles = false %}
-        {%- for block in section.blocks -%}
-          <div
-            class="collage__item collage__item--{{ block.type }}-{{ forloop.index }} collage__item--{{ section.settings.desktop_layout }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-            {{ block.shopify_attributes }}
-            {% if settings.animations_reveal_on_scroll %}
-              data-cascade
-              style="--animation-order: {{ forloop.index }};"
-            {% endif %}
-          >
+    <div class="grid grid-cols-{{ section.settings.column_amount_mobile }} gap-[{{ section.settings.block_spacing_mobile }}px] md:grid-cols-{{ section.settings.column_amount_desktop }} md:gap-[{{ section.settings.block_spacing_desktop }}px]">
+      {% assign skip_card_product_styles = false %}
+      {%- for block in section.blocks -%}
+        <div
+          class="collage__item--{{ block.type }}-{{ forloop.index }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+          {{ block.shopify_attributes }}
+          {% if settings.animations_reveal_on_scroll %}
+            data-cascade
+            style="--animation-order: {{ forloop.index }};"
+          {% endif %}
+        >
+          <div class="w-full max-w-none">
             {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
             {%- case block.type -%}
               {%- when 'image' -%}
                 <div class="collage-card {% if section.settings.card_styles == 'none' %}global-media-settings{% else %}card-wrapper {{ section.settings.card_styles }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
                   {% if block.settings.image_title != blank %}
                     <h2
-                      class="collage-wrapper-title inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+                      class="mt-0 mb-12 inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
                       style="font-size {{ block.settings.image_title_size }}%"
                     >
                       {{ block.settings.image_title }}
@@ -309,8 +268,8 @@
                 </div>
             {%- endcase -%}
           </div>
-        {%- endfor -%}
-      </div>
+        </div>
+      {%- endfor -%}
     </div>
   </div>
 </div>
