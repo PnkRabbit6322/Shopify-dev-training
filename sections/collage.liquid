@@ -83,14 +83,13 @@
                 <div class="collage-card {% if section.settings.card_styles == 'none' %}global-media-settings{% else %}card-wrapper {{ section.settings.card_styles }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
                   {% if block.settings.image_title != blank %}
                     <h2
-                      class="mt-0 mb-12 inline-text {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                      style="font-size {{ block.settings.image_title_size }}%"
+                      class="mt-0 mb-12 inline-text text-[{{ block.settings.image_title_size }}%] {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
                     >
                       {{ block.settings.image_title }}
                     </h2>
                   {% endif %}
                   <div
-                    class="media media--transparent ratio"
+                    class="flex relative overflow-hidden bg-transparent items-stretch"
                     {% if block.settings.image != blank %}
                       style="--ratio-percent: {{ 1 | divided_by: block.settings.image.aspect_ratio | times: 100 }}%"
                     {% else %}

@@ -98,7 +98,13 @@
           "on_secondary_button": "secondary_button_label",
           "secondary_button_border": "secondary_button_label"
         }
-      }
+      },
+      {
+        "type": "color",
+        "id": "highlight-text",
+        "label": "Highlight text color",
+        "default": "#c17c4f"
+      },
     ]
   },
   {
